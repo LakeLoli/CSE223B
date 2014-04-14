@@ -1,10 +1,9 @@
 package triblab
 //package main
-// test test test 
-
 
 import(
 	"trib"
+	"net/rpc"
 )
 
 type client struct {
@@ -14,11 +13,33 @@ type client struct {
 
 // implents Key-value pair interfaces
 func (self *client) Get(key string, value *string) error{
-	panic("todo")
+	conn, e := rpc.DialHTTP("tcp", self.addr)
+	if e != nil {
+		return e
+	}
+
+	e = conn.Call("Storage.Get", key, value)
+	if e != nil {
+		conn.Close()
+		return e
+	}
+
+	return conn.Close()
 }
 
 func (self *client) Set(kv *trib.KeyValue, succ *bool) error{
-	panic("todo")
+	conn, e := rpc.DialHTTP("tcp", self.addr)
+	if e != nil {
+		return e
+	}
+
+	e = conn.Call("Storage.Set", kv, succ)
+	if e != nil {
+		conn.Close()
+		return e
+	}
+
+	return conn.Close()
 }
 
 func (self *client) Keys(p *trib.Pattern, list *trib.List) error{
