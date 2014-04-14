@@ -16,15 +16,23 @@ func NewClient(addr string) trib.Storage {
 // Serve as a backend based on the given configuration
 func ServeBack(b *trib.BackConfig) error {
 	laddr := b.Addr
-	storage := b.Store
+	//storage := b.Store
 	
-	rpc.Register(storage)		
+	rpc.Register(b.Store)		
 	rpc.HandleHTTP()
 	l, e := net.Listen("tcp", laddr)
+	log.Printf("Listen port has been set up!\n")
 	if e!= nil {
-		b.Ready <- false
+		if b.Ready != nil {
+			b.Ready <- false
+		}
 		log.Fatal("listen error: ", e)
+		return e;
 	}
-	b.Ready <- true
+	if b.Ready != nil {
+		log.Printf("")
+		b.Ready <- true
+	}
+	
 	return http.Serve(l, nil)
 }
